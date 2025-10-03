@@ -3031,7 +3031,7 @@ class TestResponseTest extends TestCase
             ])
         );
 
-        $response->assertResourcePagination(['meta.total']);
+        $response->assertResourcePagination(exclude: ['meta.total']);
     }
 
     public function testAssertResourcePaginationWithExcludedTopLevelKeys(): void
@@ -3053,7 +3053,7 @@ class TestResponseTest extends TestCase
             ])
         );
 
-        $response->assertResourcePagination(['links']);
+        $response->assertResourcePagination(exclude: ['links']);
     }
 
     public function testAssertResourcePaginationWithMultipleExcludedKeys(): void
@@ -3077,7 +3077,7 @@ class TestResponseTest extends TestCase
             ])
         );
 
-        $response->assertResourcePagination(['links.prev', 'links.next', 'meta.to', 'meta.total']);
+        $response->assertResourcePagination(exclude: ['links.prev', 'links.next', 'meta.to', 'meta.total']);
     }
 
     public function testAssertResourcePaginationWithIncludedFields(): void
@@ -3107,7 +3107,7 @@ class TestResponseTest extends TestCase
             ])
         );
 
-        $response->assertResourcePagination([], [
+        $response->assertResourcePagination([
             'custom_top_level_field',
             'meta.custom_meta_field',
         ]);
@@ -3142,8 +3142,7 @@ class TestResponseTest extends TestCase
             ])
         );
 
-        // This should pass because we're including nested structured fields
-        $response->assertResourcePagination([], [
+        $response->assertResourcePagination([
             'meta.nested_object' => [
                 'nested_field1',
                 'nested_field2',
@@ -3158,12 +3157,6 @@ class TestResponseTest extends TestCase
                 'data' => [
                     ['id' => 1, 'name' => 'John'],
                 ],
-                'links' => [
-                    'first' => 'http://example.com/users?page=1',
-                    'last' => 'http://example.com/users?page=3',
-                    'prev' => null,
-                    'next' => 'http://example.com/users?page=2',
-                ],
                 'meta' => [
                     'current_page' => 1,
                     'from' => 1,
@@ -3172,17 +3165,12 @@ class TestResponseTest extends TestCase
                     'per_page' => 15,
                     'to' => 15,
                     'total' => 45,
-                    // Custom field that we want to include
                     'custom_field' => 'custom_value',
                 ],
             ])
         );
 
-        // This should pass because we're including custom field that exists
-        $response->assertResourcePagination(
-            [], // no fields to exclude since all standard fields are present
-            ['meta.custom_field'] // include custom field that exists
-        );
+        $response->assertResourcePagination(['meta.custom_field'], ['links']);
     }
 
     private function makeMockResponse($content)

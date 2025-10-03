@@ -1198,8 +1198,8 @@ class TestResponse implements ArrayAccess
     /**
      * Assert that the response contains the expected pagination keys.
      *
-     * @param  array  $exclude
      * @param  array  $include
+     * @param  array  $exclude
      * @return $this
      */
     public function assertResourcePagination(array $include = [], array $exclude = [])
@@ -1235,7 +1235,14 @@ class TestResponse implements ArrayAccess
 
         if (! empty($exclude)) {
             foreach ($exclude as $key) {
-                Arr::forget($structure, $key);
+                if (str_contains($key, '.')) {
+                    [$parent, $child] = explode('.', $key, 2);
+                    if (isset($structure[$parent]) && is_array($structure[$parent])) {
+                        $structure[$parent] = array_values(array_diff($structure[$parent], [$child]));
+                    }
+                } else {
+                    unset($structure[$key]);
+                }
             }
         }
 
