@@ -1196,6 +1196,55 @@ class TestResponse implements ArrayAccess
     }
 
     /**
+     * Assert that the response contains the expected pagination keys.
+     *
+     * @param  array  $exclude
+     * @param  array  $include
+     * @return $this
+     */
+    public function assertResourcePagination(array $include = [], array $exclude = [])
+    {
+        $structure = [
+            'data',
+            'links' => [
+                'first',
+                'last',
+                'prev',
+                'next',
+            ],
+            'meta' => [
+                'current_page',
+                'from',
+                'last_page',
+                'path',
+                'per_page',
+                'to',
+                'total',
+            ],
+        ];
+
+        if (! empty($include)) {
+            foreach ($include as $key => $value) {
+                if (is_numeric($key)) {
+                    Arr::set($structure, $value, []);
+                } else {
+                    Arr::set($structure, $key, $value);
+                }
+            }
+        }
+
+        if (! empty($exclude)) {
+            foreach ($exclude as $key) {
+                Arr::forget($structure, $key);
+            }
+        }
+
+        $this->assertJsonStructure($structure);
+
+        return $this;
+    }
+
+    /**
      * Validate the decoded response JSON.
      *
      * @return \Illuminate\Testing\AssertableJsonString
@@ -1299,7 +1348,6 @@ class TestResponse implements ArrayAccess
     /**
      * Assert that the response view has a given list of bound data.
      *
-     * @param  array  $bindings
      * @return $this
      */
     public function assertViewHasAll(array $bindings)
@@ -1419,8 +1467,8 @@ class TestResponse implements ArrayAccess
      * @return $this
      */
     public function assertInvalid($errors = null,
-                                  $errorBag = 'default',
-                                  $responseKey = 'errors')
+        $errorBag = 'default',
+        $responseKey = 'errors')
     {
         if ($this->baseResponse->headers->get('Content-Type') === 'application/json') {
             return $this->assertJsonValidationErrors($errors, $responseKey);
@@ -1530,7 +1578,6 @@ class TestResponse implements ArrayAccess
     /**
      * Assert that the session has a given list of values.
      *
-     * @param  array  $bindings
      * @return $this
      */
     public function assertSessionHasAll(array $bindings)
@@ -1876,7 +1923,6 @@ class TestResponse implements ArrayAccess
     /**
      * Set the previous exceptions on the response.
      *
-     * @param  \Illuminate\Support\Collection  $exceptions
      * @return $this
      */
     public function withExceptions(Collection $exceptions)
@@ -1912,7 +1958,6 @@ class TestResponse implements ArrayAccess
      * Determine if the given offset exists.
      *
      * @param  string  $offset
-     * @return bool
      */
     public function offsetExists($offset): bool
     {
@@ -1925,7 +1970,6 @@ class TestResponse implements ArrayAccess
      * Get the value for a given offset.
      *
      * @param  string  $offset
-     * @return mixed
      */
     public function offsetGet($offset): mixed
     {
@@ -1939,7 +1983,6 @@ class TestResponse implements ArrayAccess
      *
      * @param  string  $offset
      * @param  mixed  $value
-     * @return void
      *
      * @throws \LogicException
      */
@@ -1952,7 +1995,6 @@ class TestResponse implements ArrayAccess
      * Unset the value at the given offset.
      *
      * @param  string  $offset
-     * @return void
      *
      * @throws \LogicException
      */

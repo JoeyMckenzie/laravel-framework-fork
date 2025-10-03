@@ -2978,6 +2978,213 @@ class TestResponseTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function testAssertResourcePagination(): void
+    {
+        $response = TestResponse::fromBaseResponse(
+            new JsonResponse([
+                'data' => [
+                    ['id' => 1, 'name' => 'John'],
+                    ['id' => 2, 'name' => 'Jane'],
+                ],
+                'links' => [
+                    'first' => 'http://example.com/users?page=1',
+                    'last' => 'http://example.com/users?page=3',
+                    'prev' => null,
+                    'next' => 'http://example.com/users?page=2',
+                ],
+                'meta' => [
+                    'current_page' => 1,
+                    'from' => 1,
+                    'last_page' => 3,
+                    'path' => 'http://example.com/users',
+                    'per_page' => 15,
+                    'to' => 15,
+                    'total' => 45,
+                ],
+            ])
+        );
+
+        $response->assertResourcePagination();
+    }
+
+    public function testAssertResourcePaginationWithExcludedKeys(): void
+    {
+        $response = TestResponse::fromBaseResponse(
+            new JsonResponse([
+                'data' => [
+                    ['id' => 1, 'name' => 'John'],
+                ],
+                'links' => [
+                    'first' => 'http://example.com/users?page=1',
+                    'last' => 'http://example.com/users?page=3',
+                    'prev' => null,
+                    'next' => 'http://example.com/users?page=2',
+                ],
+                'meta' => [
+                    'current_page' => 1,
+                    'from' => 1,
+                    'last_page' => 3,
+                    'path' => 'http://example.com/users',
+                    'per_page' => 15,
+                    'to' => 15,
+                ],
+            ])
+        );
+
+        $response->assertResourcePagination(['meta.total']);
+    }
+
+    public function testAssertResourcePaginationWithExcludedTopLevelKeys(): void
+    {
+        $response = TestResponse::fromBaseResponse(
+            new JsonResponse([
+                'data' => [
+                    ['id' => 1, 'name' => 'John'],
+                ],
+                'meta' => [
+                    'current_page' => 1,
+                    'from' => 1,
+                    'last_page' => 3,
+                    'path' => 'http://example.com/users',
+                    'per_page' => 15,
+                    'to' => 15,
+                    'total' => 45,
+                ],
+            ])
+        );
+
+        $response->assertResourcePagination(['links']);
+    }
+
+    public function testAssertResourcePaginationWithMultipleExcludedKeys(): void
+    {
+        $response = TestResponse::fromBaseResponse(
+            new JsonResponse([
+                'data' => [
+                    ['id' => 1, 'name' => 'John'],
+                ],
+                'links' => [
+                    'first' => 'http://example.com/users?page=1',
+                    'last' => 'http://example.com/users?page=3',
+                ],
+                'meta' => [
+                    'current_page' => 1,
+                    'from' => 1,
+                    'last_page' => 3,
+                    'path' => 'http://example.com/users',
+                    'per_page' => 15,
+                ],
+            ])
+        );
+
+        $response->assertResourcePagination(['links.prev', 'links.next', 'meta.to', 'meta.total']);
+    }
+
+    public function testAssertResourcePaginationWithIncludedFields(): void
+    {
+        $response = TestResponse::fromBaseResponse(
+            new JsonResponse([
+                'data' => [
+                    ['id' => 1, 'name' => 'John'],
+                ],
+                'links' => [
+                    'first' => 'http://example.com/users?page=1',
+                    'last' => 'http://example.com/users?page=3',
+                    'prev' => null,
+                    'next' => 'http://example.com/users?page=2',
+                ],
+                'meta' => [
+                    'current_page' => 1,
+                    'from' => 1,
+                    'last_page' => 3,
+                    'path' => 'http://example.com/users',
+                    'per_page' => 15,
+                    'to' => 15,
+                    'total' => 45,
+                    'custom_meta_field' => 'custom_value',
+                ],
+                'custom_top_level_field' => 'some_value',
+            ])
+        );
+
+        $response->assertResourcePagination([], [
+            'custom_top_level_field',
+            'meta.custom_meta_field',
+        ]);
+    }
+
+    public function testAssertResourcePaginationWithIncludedStructuredFields(): void
+    {
+        $response = TestResponse::fromBaseResponse(
+            new JsonResponse([
+                'data' => [
+                    ['id' => 1, 'name' => 'John'],
+                ],
+                'links' => [
+                    'first' => 'http://example.com/users?page=1',
+                    'last' => 'http://example.com/users?page=3',
+                    'prev' => null,
+                    'next' => 'http://example.com/users?page=2',
+                ],
+                'meta' => [
+                    'current_page' => 1,
+                    'from' => 1,
+                    'last_page' => 3,
+                    'path' => 'http://example.com/users',
+                    'per_page' => 15,
+                    'to' => 15,
+                    'total' => 45,
+                    'nested_object' => [
+                        'nested_field1' => 'value1',
+                        'nested_field2' => 'value2',
+                    ],
+                ],
+            ])
+        );
+
+        // This should pass because we're including nested structured fields
+        $response->assertResourcePagination([], [
+            'meta.nested_object' => [
+                'nested_field1',
+                'nested_field2',
+            ],
+        ]);
+    }
+
+    public function testAssertResourcePaginationWithExcludeAndInclude(): void
+    {
+        $response = TestResponse::fromBaseResponse(
+            new JsonResponse([
+                'data' => [
+                    ['id' => 1, 'name' => 'John'],
+                ],
+                'links' => [
+                    'first' => 'http://example.com/users?page=1',
+                    'last' => 'http://example.com/users?page=3',
+                    'prev' => null,
+                    'next' => 'http://example.com/users?page=2',
+                ],
+                'meta' => [
+                    'current_page' => 1,
+                    'from' => 1,
+                    'last_page' => 3,
+                    'path' => 'http://example.com/users',
+                    'per_page' => 15,
+                    'to' => 15,
+                    'total' => 45,
+                    // Custom field that we want to include
+                    'custom_field' => 'custom_value',
+                ],
+            ])
+        );
+
+        // This should pass because we're including custom field that exists
+        $response->assertResourcePagination(
+            [], // no fields to exclude since all standard fields are present
+            ['meta.custom_field'] // include custom field that exists
+        );
+    }
+
     private function makeMockResponse($content)
     {
         $baseResponse = tap(new Response, function ($response) use ($content) {
