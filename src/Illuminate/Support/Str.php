@@ -2096,4 +2096,48 @@ class Str
         static::$camelCache = [];
         static::$studlyCache = [];
     }
+
+    /**
+     * Determines if a string is null or contains no characters.
+     *
+     * @param string|null $string
+     * @return bool
+     */
+    public static function nullOrEmpty($string)
+    {
+        return $string === null || $string === '';
+    }
+
+    /**
+     * Determines if a string is null or contains only whitespace characters.
+     *
+     * @param string|null $string
+     * @return bool
+     */
+    public static function nullOrWhitespace($string)
+    {
+        return self::nullOrEmpty($string) || trim($string) === '';
+    }
+
+    /**
+     * Determines if a string is not null and contains characters.
+     *
+     * @param string|null $string
+     * @return bool
+     */
+    public static function notNullOrEmpty($string): bool
+    {
+        return ! self::nullOrEmpty($string);
+    }
+
+    /**
+     * Determines if a string is not null and does not contain only whitespace characters.
+     *
+     * @param string|null $string
+     * @return bool
+     */
+    public static function notNullOrWhitespace($string): bool
+    {
+        return ! self::nullOrWhitespace($string);
+    }
 }
