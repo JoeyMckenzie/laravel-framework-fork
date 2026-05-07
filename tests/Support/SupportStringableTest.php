@@ -50,6 +50,38 @@ class SupportStringableTest extends TestCase
         $this->assertFalse($this->stringable('https://laravel.com')->isUrl(['http']));
     }
 
+    public function testCanonicalUrl()
+    {
+        $canonical = $this->stringable('https://www.example.com/')->canonicalUrl();
+
+        $this->assertInstanceOf(Stringable::class, $canonical);
+        $this->assertSame('https://example.com', (string) $canonical);
+
+        $this->assertSame('https://example.com', (string) $this->stringable('  HTTPS://EXAMPLE.COM/  ')->canonicalUrl());
+        $this->assertSame('https://example.com/path?q=1#frag', (string) $this->stringable('https://www.example.com/path/?q=1#frag')->canonicalUrl());
+        $this->assertSame('https://example.com', (string) $this->stringable('example.com')->canonicalUrl());
+        $this->assertSame('', (string) $this->stringable('')->canonicalUrl());
+    }
+
+    public function testUrlVariants()
+    {
+        $variants = $this->stringable('https://example.com')->urlVariants();
+
+        $this->assertInstanceOf(Collection::class, $variants);
+        $this->assertCount(8, $variants);
+        $this->assertContains('https://example.com', $variants->all());
+        $this->assertContains('http://www.example.com/', $variants->all());
+
+        $this->assertTrue($this->stringable('')->urlVariants()->isEmpty());
+        $this->assertTrue($this->stringable('   ')->urlVariants()->isEmpty());
+
+        // The variant set is independent of the supplied scheme/www form.
+        $this->assertEquals(
+            $this->stringable('https://example.com')->urlVariants()->sort()->values()->all(),
+            $this->stringable('http://www.example.com/')->urlVariants()->sort()->values()->all()
+        );
+    }
+
     public function testIsUuid()
     {
         $this->assertTrue($this->stringable('2cdc7039-65a6-4ac7-8e5d-d554a98e7b15')->isUuid());

@@ -403,6 +403,26 @@ class Stringable implements JsonSerializable, ArrayAccess, BaseStringable
     }
 
     /**
+     * Get a canonical form of the URL suitable for equality comparison.
+     *
+     * @return static
+     */
+    public function canonicalUrl()
+    {
+        return new static(Str::canonicalUrl($this->value));
+    }
+
+    /**
+     * Get all common scheme/www/trailing-slash variants of the URL.
+     *
+     * @return \Illuminate\Support\Collection<int, string>
+     */
+    public function urlVariants()
+    {
+        return new Collection(Str::urlVariants($this->value));
+    }
+
+    /**
      * Determine if a given string is a valid UUID.
      *
      * @param  int<0, 8>|'max'|null  $version

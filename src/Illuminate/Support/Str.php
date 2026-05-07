@@ -638,6 +638,103 @@ class Str
     }
 
     /**
+     * Get a canonical form of the given URL suitable for equality comparison.
+     *
+     * Normalizes the scheme (defaults to https), lowercases the host, strips
+     * any leading "www." subdomain, and removes a trailing slash from the
+     * path. The path, query, and fragment are otherwise preserved verbatim.
+     *
+     * @param  string  $url
+     * @return string
+     */
+    public static function canonicalUrl($url)
+    {
+        $url = trim($url);
+
+        if ($url === '') {
+            return '';
+        }
+
+        if (! preg_match('#^[a-z][a-z0-9+\-.]*://#i', $url)) {
+            $url = 'https://'.$url;
+        }
+
+        $parts = parse_url($url);
+
+        if ($parts === false || ! isset($parts['host'])) {
+            return $url;
+        }
+
+        $scheme = strtolower($parts['scheme'] ?? 'https');
+        $host = strtolower($parts['host']);
+
+        if (str_starts_with($host, 'www.')) {
+            $host = substr($host, 4);
+        }
+
+        $port = isset($parts['port']) ? ':'.$parts['port'] : '';
+
+        $userInfo = '';
+
+        if (isset($parts['user'])) {
+            $userInfo = $parts['user'].(isset($parts['pass']) ? ':'.$parts['pass'] : '').'@';
+        }
+
+        $path = $parts['path'] ?? '';
+
+        if ($path === '' || $path === '/') {
+            $path = '';
+        } else {
+            $path = rtrim($path, '/');
+        }
+
+        $query = isset($parts['query']) ? '?'.$parts['query'] : '';
+        $fragment = isset($parts['fragment']) ? '#'.$parts['fragment'] : '';
+
+        return $scheme.'://'.$userInfo.$host.$port.$path.$query.$fragment;
+    }
+
+    /**
+     * Get the input URL plus all common scheme/www/trailing-slash variants
+     * that should be considered the same site for deduplication purposes.
+     *
+     * @param  string  $url
+     * @return list<string>
+     */
+    public static function urlVariants($url)
+    {
+        $url = trim($url);
+
+        if ($url === '') {
+            return [];
+        }
+
+        $stripped = preg_replace('#^https?://#i', '', $url);
+        $stripped = rtrim((string) $stripped, '/');
+
+        $hosts = [];
+
+        if (str_starts_with($stripped, 'www.')) {
+            $hosts[] = $stripped;
+            $hosts[] = substr($stripped, 4);
+        } else {
+            $hosts[] = $stripped;
+            $hosts[] = 'www.'.$stripped;
+        }
+
+        $variants = [];
+
+        foreach (array_unique($hosts) as $host) {
+            foreach (['http://', 'https://'] as $scheme) {
+                $variants[] = $scheme.$host;
+                $variants[] = $scheme.$host.'/';
+            }
+        }
+
+        return array_values(array_unique($variants));
+    }
+
+    /**
      * Determine if a given value is a valid UUID.
      *
      * @param  mixed  $value
