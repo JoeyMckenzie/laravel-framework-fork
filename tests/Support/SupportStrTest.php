@@ -719,6 +719,100 @@ class SupportStrTest extends TestCase
         $this->assertFalse(Str::isUrl('http:///path'));
     }
 
+    public function testCanonicalUrl()
+    {
+        // Already canonical input is returned unchanged.
+        $this->assertSame('https://example.com', Str::canonicalUrl('https://example.com'));
+
+        // Whitespace is trimmed, empty input returns an empty string.
+        $this->assertSame('', Str::canonicalUrl(''));
+        $this->assertSame('', Str::canonicalUrl('   '));
+        $this->assertSame('https://example.com', Str::canonicalUrl('  https://example.com  '));
+
+        // Missing scheme defaults to https.
+        $this->assertSame('https://example.com', Str::canonicalUrl('example.com'));
+        $this->assertSame('https://example.com', Str::canonicalUrl('www.example.com'));
+
+        // Leading "www." is stripped from the host.
+        $this->assertSame('https://example.com', Str::canonicalUrl('https://www.example.com'));
+        $this->assertSame('http://example.com', Str::canonicalUrl('http://www.example.com'));
+
+        // Host is lowercased; scheme is lowercased.
+        $this->assertSame('https://example.com', Str::canonicalUrl('HTTPS://EXAMPLE.COM'));
+        $this->assertSame('https://example.com', Str::canonicalUrl('Https://Example.Com'));
+
+        // Trailing slash is removed from a root path.
+        $this->assertSame('https://example.com', Str::canonicalUrl('https://example.com/'));
+
+        // A non-root trailing slash is stripped, but the path is otherwise preserved (including case).
+        $this->assertSame('https://example.com/Path', Str::canonicalUrl('https://example.com/Path/'));
+        $this->assertSame('https://example.com/path/to/resource', Str::canonicalUrl('https://example.com/path/to/resource'));
+
+        // Query string and fragment are preserved verbatim.
+        $this->assertSame('https://example.com?q=1', Str::canonicalUrl('https://example.com/?q=1'));
+        $this->assertSame('https://example.com/path?q=1&r=2', Str::canonicalUrl('https://example.com/path?q=1&r=2'));
+        $this->assertSame('https://example.com#section', Str::canonicalUrl('https://example.com/#section'));
+        $this->assertSame('https://example.com/path?q=1#frag', Str::canonicalUrl('https://www.example.com/path/?q=1#frag'));
+
+        // Port and user info are preserved.
+        $this->assertSame('https://example.com:8080/path', Str::canonicalUrl('https://example.com:8080/path/'));
+        $this->assertSame('https://user:pass@example.com', Str::canonicalUrl('https://user:pass@www.example.com/'));
+
+        // Two URLs that differ only by www/trailing-slash noise canonicalize to the same string.
+        $this->assertSame(
+            Str::canonicalUrl('https://www.example.com/'),
+            Str::canonicalUrl('https://example.com')
+        );
+    }
+
+    public function testUrlVariants()
+    {
+        // Empty / whitespace-only input returns an empty array.
+        $this->assertSame([], Str::urlVariants(''));
+        $this->assertSame([], Str::urlVariants('   '));
+
+        // A bare URL produces the full eight-variant matrix.
+        $variants = Str::urlVariants('https://example.com');
+
+        $expected = [
+            'http://example.com',
+            'http://example.com/',
+            'https://example.com',
+            'https://example.com/',
+            'http://www.example.com',
+            'http://www.example.com/',
+            'https://www.example.com',
+            'https://www.example.com/',
+        ];
+
+        sort($variants);
+        sort($expected);
+        $this->assertSame($expected, $variants);
+
+        // The variant set is stable regardless of which scheme/www form is supplied.
+        $variantsFromWww = Str::urlVariants('https://www.example.com/');
+        sort($variantsFromWww);
+        $this->assertSame($expected, $variantsFromWww);
+
+        $variantsFromBare = Str::urlVariants('example.com');
+        sort($variantsFromBare);
+        $this->assertSame($expected, $variantsFromBare);
+
+        // The returned list contains no duplicates.
+        $this->assertSame(array_values(array_unique($variants)), $variants);
+
+        // Paths are preserved on every variant.
+        $pathVariants = Str::urlVariants('https://example.com/about');
+        $this->assertContains('https://example.com/about', $pathVariants);
+        $this->assertContains('https://www.example.com/about', $pathVariants);
+        $this->assertContains('http://example.com/about/', $pathVariants);
+
+        // Surrounding whitespace is trimmed before processing.
+        $variantsTrimmed = Str::urlVariants('  https://example.com  ');
+        sort($variantsTrimmed);
+        $this->assertSame($expected, $variantsTrimmed);
+    }
+
     #[DataProvider('validUuidList')]
     public function testIsUuidWithValidUuid($uuid)
     {
