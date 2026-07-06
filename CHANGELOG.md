@@ -1,6 +1,54 @@
 # Release Notes for 12.x
 
-## [Unreleased](https://github.com/laravel/framework/compare/v12.58.0...12.x)
+## [Unreleased](https://github.com/laravel/framework/compare/v12.62.0...12.x)
+
+## [v12.62.0](https://github.com/laravel/framework/compare/v12.61.1...v12.62.0) - 2026-06-09
+
+* [12.x] Add JSON Schema array deserializer by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/laravel/framework/pull/60387
+* [12.x] Skip pg_collation lookup in compileColumns() on PostgreSQL servers before 9.1 by [@fissible](https://github.com/fissible) in https://github.com/laravel/framework/pull/60400
+* [12.x] Add multi-type union support to Illuminate JsonSchema by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/laravel/framework/pull/60462
+
+## [v12.61.1](https://github.com/laravel/framework/compare/v12.61.0...v12.61.1) - 2026-06-04
+
+* [12.x] Preserve empty HTTP attach contents by [@GrahamCampbell](https://github.com/GrahamCampbell) in https://github.com/laravel/framework/pull/60291
+* Fix [@params](https://github.com/params) typo in Fluent and MessageBag toPrettyJson() docblocks by [@Amirhf1](https://github.com/Amirhf1) in https://github.com/laravel/framework/pull/60313
+* [12.x] Fix regex typo in Env::addVariableToEnvContents that prevented quotin… by [@Amirhf1](https://github.com/Amirhf1) in https://github.com/laravel/framework/pull/60312
+* [12.x] Fix Number::trim() returning null for INF and NAN values by [@Amirhf1](https://github.com/Amirhf1) in https://github.com/laravel/framework/pull/60322
+* [12.x] Fix FIFO queue name normalization in Cloud managed queues by [@kieranbrown](https://github.com/kieranbrown) in https://github.com/laravel/framework/pull/60316
+* [12.x] Fix Number::pairs() infinite loop when $by is zero or negative by [@Amirhf1](https://github.com/Amirhf1) in https://github.com/laravel/framework/pull/60324
+* [12.x] Ensure path seperators aren't encoded in LocalFilesystemAdapter by [@jackbayliss](https://github.com/jackbayliss) in https://github.com/laravel/framework/pull/60350
+* [12.x] Ensure `config` is bound before trying to log deprecation notice by [@crynobone](https://github.com/crynobone) in https://github.com/laravel/framework/pull/60376
+
+## [v12.61.0](https://github.com/laravel/framework/compare/v12.60.2...v12.61.0) - 2026-05-26
+
+* [12.x] Accept Symfony's new control-characters exception message in mailer test by [@kieranbrown](https://github.com/kieranbrown) in https://github.com/laravel/framework/pull/60203
+* [12.x] Fix queue:failed command to show real class name by [@clementmas](https://github.com/clementmas) in https://github.com/laravel/framework/pull/60279
+* [12.x] Throw ManagedQueueNotFoundException when a managed queue is missing by [@kieranbrown](https://github.com/kieranbrown) in https://github.com/laravel/framework/pull/60276
+
+## [v12.60.2](https://github.com/laravel/framework/compare/v12.60.1...v12.60.2) - 2026-05-20
+
+* [12.x] Boot managed queues before service providers boot by [@kieranbrown](https://github.com/kieranbrown) in https://github.com/laravel/framework/pull/60199
+
+## [v12.60.1](https://github.com/laravel/framework/compare/v12.60.0...v12.60.1) - 2026-05-19
+
+* [12.x] Rename X-Request-ID header to Cloud-Request-ID by [@kieranbrown](https://github.com/kieranbrown) in https://github.com/laravel/framework/pull/60189
+
+## [v12.60.0](https://github.com/laravel/framework/compare/v12.59.0...v12.60.0) - 2026-05-19
+
+* [12.x] Fix Number::fileSize() handling of negative byte values by [@Amirhf1](https://github.com/Amirhf1) in https://github.com/laravel/framework/pull/60147
+* [12.x] Remove stale PHPStan ignore comments from type tests by [@jradtilbrook](https://github.com/jradtilbrook) in https://github.com/laravel/framework/pull/60167
+* [12.x] Output cloud request ID in logs by [@jradtilbrook](https://github.com/jradtilbrook) in https://github.com/laravel/framework/pull/60166
+* [12.x] Dedicated Cloud Queue by [@kieranbrown](https://github.com/kieranbrown) in https://github.com/laravel/framework/pull/60181
+
+## [v12.59.0](https://github.com/laravel/framework/compare/v12.58.0...v12.59.0) - 2026-05-14
+
+* [12.x] Disable pausing on managed queue workers by [@kieranbrown](https://github.com/kieranbrown) in https://github.com/laravel/framework/pull/59871
+* [12.x] Fix infinite recursion when defining model scope with attribute as private by [@noefleury](https://github.com/noefleury) in https://github.com/laravel/framework/pull/59958
+* [12.x] Fix infinite recursion when middleware group referencing itself by [@noefleury](https://github.com/noefleury) in https://github.com/laravel/framework/pull/60002
+* [12.x] Backport #60000 to 12.x by [@iWader](https://github.com/iWader) in https://github.com/laravel/framework/pull/60006
+* [12.x] Narrow attachment url scheme by [@benbjurstrom](https://github.com/benbjurstrom) in https://github.com/laravel/framework/pull/60035
+* [12.x] backport #60045 to 12.x by [@levikl](https://github.com/levikl) in https://github.com/laravel/framework/pull/60052
+* [12.x] Back port cloud queues by [@timacdonald](https://github.com/timacdonald) in https://github.com/laravel/framework/pull/60122
 
 ## [v12.58.0](https://github.com/laravel/framework/compare/v12.57.0...v12.58.0) - 2026-04-26
 
